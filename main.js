@@ -59,8 +59,6 @@ const app = new Vue({
       this.excusedTotal = students.filter((student) => student?.signIn && !student?.signOut).length;
 
       this.students = students;
-
-      console.log(this.students);
     },
   },
 });
