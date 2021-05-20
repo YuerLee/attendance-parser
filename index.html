@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance Parser</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+  </head>
+  <body>
+    <div id="app" class="container">
+      <div class="input-container">
+        <div class="input-content">
+          <h2>簽到</h2>
+          <textarea class="textarea" name="sing-in" id="sing-in" cols="30" rows="15" v-model="signInText"></textarea>
+        </div>
+
+        <div class="input-content">
+          <h2>簽退</h2>
+          <textarea class="textarea" name="sing-out" id="sing-out" cols="30" rows="15" v-model="signOutText"></textarea>
+        </div>
+      </div>
+
+      <div>
+        班級人數：<input type="number" name="total" class="total" v-model="total" />
+        <button class="parse-btn" v-on:click="parse">Parse</button>
+      </div>
+
+      <h4 v-if="students && students.length > 0" class="summary">
+        出席 {{signInList.length}} 人 / 未出席 {{absenceTotal}} 人 / 遲到 {{lateTotal}} 人 / 早退 {{excusedTotal}} 人 /
+        共 {{total}} 人
+      </h4>
+
+      <table v-if="students && students.length > 0" class="table" border="1">
+        <thead>
+          <tr>
+            <th class="th">號次</th>
+            <th class="th">姓名</th>
+            <th class="th">出席</th>
+            <th class="th">未出席</th>
+            <th class="th">遲到</th>
+            <th class="th">早退</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(student,index) in students">
+            <td>{{student?.classNumber}} {{student?.number ?? index+1}}</td>
+            <td>{{student?.name}}</td>
+            <td>{{student?.signIn || student?.signOut ? '✅' : ''}}</td>
+            <td>{{!student?.signIn && !student?.signOut ? '✅' : ''}}</td>
+            <td>{{!student?.signIn && student?.signOut ? '✅' : ''}}</td>
+            <td>{{student?.signIn && !student?.signOut ? '✅' : ''}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>

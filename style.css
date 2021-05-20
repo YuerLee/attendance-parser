@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 960px;
+  margin: 0 auto;
+  align-items: center;
+  align-content: space-around;
+}
+
+.input-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.input-content {
+  width: 450px;
+  margin: 0 10px;
+}
+
+.textarea {
+  width: 100%;
+}
+
+.total {
+  width: 30px;
+}
+
+.parse-btn {
+  width: 150px;
+  line-height: 36px;
+  margin: 30px;
+}
+
+.summary {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  text-align: center;
+  background: #ffffff;
+}
+
+.table {
+  width: 550px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.th {
+  position: sticky;
+  top: 20px;
+  background: #ffffff;
+}
