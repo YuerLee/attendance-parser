@@ -18,35 +18,41 @@ new Vue({
   },
   methods: {
     parseStudentFromText(text) {
-      return (text.replace(this.findWhiteSpaceWithoutLineBreakRegex, '').match(this.findStudentRegex) || []).map(
-        (text) => {
-          const clearText = (text || '').replace(/\s/g, '');
-          const clearNumberGroup = clearText.match(/[0-9]/g);
-          const classNumber = Number(clearText.slice(0, 3));
-          const number = Number(clearText.slice(3, clearNumberGroup.length));
-          const name = clearText.slice(clearNumberGroup.length);
+      const clearListText = text.replace(this.findWhiteSpaceWithoutLineBreakRegex, '');
+      const studentTextList = clearListText.match(this.findStudentRegex) || [];
 
-          return { classNumber, number, name };
-        }
-      );
+      return studentTextList.map((text) => {
+        const clearText = (text || '').replace(/\s/g, '');
+        const clearNumberGroup = clearText.match(/[0-9]/g);
+        const classNumber = Number(clearText.slice(0, 3));
+        const number = Number(clearText.slice(3, clearNumberGroup.length));
+        const name = clearText.slice(clearNumberGroup.length);
+
+        return { classNumber, number, name };
+      });
     },
     findInList(student, list) {
-      return list.find(
-        (signInStudent) =>
-          signInStudent?.number === student?.number &&
-          (!student?.classNumber || signInStudent?.classNumber === student?.classNumber)
-      );
+      return list.find((signInStudent) => {
+        const isSameNumber = signInStudent?.number === student?.number;
+        const isSameClassNumber = !student?.classNumber || signInStudent?.classNumber === student?.classNumber;
+
+        return isSameNumber && isSameClassNumber;
+      });
     },
     findName(a, b) {
-      return a?.name && b?.name
-        ? a?.name === b?.name
-          ? a?.name
-          : `${a?.name} / ${b?.name}`
-        : !a?.name && !b?.name
-        ? undefined
-        : a?.name
-        ? a?.name
-        : b?.name;
+      if (!a?.name && !b?.name) {
+        return undefined;
+      }
+
+      if (a?.name && b?.name) {
+        if (a.name === b.name) {
+          return a.name;
+        }
+
+        return `${a.name} / ${b.name}`;
+      }
+
+      return a?.name ?? b?.name;
     },
     parse: function () {
       this.signInList = this.parseStudentFromText(this.signInText);
