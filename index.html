@@ -13,6 +13,18 @@
     <div id="app" class="container">
       <div class="input-container">
         <div class="input-content">
+          <h2>應到名單</h2>
+          <textarea
+            class="textarea"
+            name="expected-students"
+            id="expected-students"
+            cols="30"
+            rows="15"
+            v-model="expectedStudentsText"
+          ></textarea>
+        </div>
+
+        <div class="input-content">
           <h2>簽到</h2>
           <textarea class="textarea" name="sing-in" id="sing-in" cols="30" rows="15" v-model="signInText"></textarea>
         </div>
@@ -24,13 +36,13 @@
       </div>
 
       <div>
-        班級人數：<input type="number" name="total" class="total" v-model="total" />
+        班級人數（應到名單為空時生效）：<input type="number" name="total" class="total" v-model="total" />
         <button class="parse-btn" v-on:click="parse">Parse</button>
       </div>
 
       <h4 v-if="students && students.length > 0" class="summary">
-        出席 {{signInList.length}} 人 / 未出席 {{absenceTotal}} 人 / 遲到 {{lateTotal}} 人 / 早退 {{excusedTotal}} 人 /
-        共 {{total}} 人
+        出席 {{fullAttendanceTotal}} 人 / 未出席 {{absenceTotal}} 人 / 遲到 {{lateTotal}} 人 / 早退 {{excusedTotal}} 人
+        / 共 {{students.length}} 人
       </h4>
 
       <table v-if="students && students.length > 0" class="table" border="1">
@@ -46,9 +58,9 @@
         </thead>
         <tbody>
           <tr v-for="(student,index) in students">
-            <td>{{student?.classNumber}} {{student?.number ?? index+1}}</td>
+            <td>{{student?.classNumber}} {{String(student?.number ?? index+1).padStart(2,'0')}}</td>
             <td>{{student?.name}}</td>
-            <td>{{student?.signIn || student?.signOut ? '✅' : ''}}</td>
+            <td>{{student?.signIn && student?.signOut ? '✅' : ''}}</td>
             <td>{{!student?.signIn && !student?.signOut ? '✅' : ''}}</td>
             <td>{{!student?.signIn && student?.signOut ? '✅' : ''}}</td>
             <td>{{student?.signIn && !student?.signOut ? '✅' : ''}}</td>
@@ -57,6 +69,7 @@
       </table>
     </div>
 
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CString.prototype.padStart%2CArray.prototype.some"></script>
     <script src="main.js"></script>
   </body>
 </html>

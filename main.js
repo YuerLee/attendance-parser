@@ -1,13 +1,15 @@
 'use strict';
 
-const app = new Vue({
+new Vue({
   el: '#app',
   data: {
-    regex: /[0-9]{5}.{1,}/g,
+    findStudentRegex: /[0-9]{4,5}.{1,}/g,
+    findWhiteSpaceWithoutLineBreakRegex: /[^\S\r\n]/g,
     total: 40,
     students: [],
     signInText: '',
     signOutText: '',
+    expectedStudentsText: '',
     signInList: {},
     signOutList: {},
     absenceTotal: 0,
@@ -15,46 +17,55 @@ const app = new Vue({
     excusedTotal: 0,
   },
   methods: {
+    parseStudentFromText(text) {
+      return (text.replace(this.findWhiteSpaceWithoutLineBreakRegex, '').match(this.findStudentRegex) || []).map(
+        (text) => {
+          const clearText = (text || '').replace(/\s/g, '');
+          const clearNumberGroup = clearText.match(/[0-9]/g);
+          const classNumber = Number(clearText.slice(0, 3));
+          const number = Number(clearText.slice(3, clearNumberGroup.length));
+          const name = clearText.slice(clearNumberGroup.length);
+
+          return { classNumber, number, name };
+        }
+      );
+    },
+    findInList(student, list) {
+      return list.find(
+        (signInStudent) =>
+          signInStudent?.number === student?.number &&
+          (!student?.classNumber || signInStudent?.classNumber === student?.classNumber)
+      );
+    },
+    findName(a, b) {
+      return a?.name && b?.name
+        ? a?.name === b?.name
+          ? a?.name
+          : `${a?.name} / ${b?.name}`
+        : !a?.name && !b?.name
+        ? undefined
+        : a?.name
+        ? a?.name
+        : b?.name;
+    },
     parse: function () {
-      this.students = [];
-      this.signInList = {};
-      this.signOutList = {};
+      this.signInList = this.parseStudentFromText(this.signInText);
+      this.signOutList = this.parseStudentFromText(this.signOutText);
 
-      this.signInList = (this.signInText.match(this.regex) || [])
-        .map((text) => {
-          const clearText = (text || '').replace(/\s/g, '');
-          const classNumber = clearText.slice(0, 3);
-          const number = clearText.slice(3, 5);
-          const name = clearText.slice(5);
+      const expectedList = this.parseStudentFromText(this.expectedStudentsText);
+      const expectedTemplateList = Array.from(Array(Number(this.total)).keys()).map((index) => ({ number: index + 1 }));
 
-          return { classNumber, number, name };
-        })
-        .sort((a, b) => a.number - b.number);
+      const students = (expectedList?.length ? expectedList : expectedTemplateList).map((student) => {
+        const signInStudent = this.findInList(student, this.signInList);
+        const signOutStudent = this.findInList(student, this.signOutList);
 
-      this.signOutList = (this.signOutText.match(this.regex) || [])
-        .map((text) => {
-          const clearText = (text || '').replace(/\s/g, '');
-          const classNumber = clearText.slice(0, 3);
-          const number = clearText.slice(3, 5);
-          const name = clearText.slice(5);
+        const name = this.findName(signInStudent, signOutStudent);
 
-          return { classNumber, number, name };
-        })
-        .sort((a, b) => a.number - b.number);
-
-      const students = Array.from(Array(this.total).keys());
-
-      this.signInList.forEach((student) => {
-        const index = Number(student.number) - 1;
-        students[index] = { ...students[index], ...student, signIn: true };
+        return { name, ...student, signIn: !!signInStudent, signOut: !!signOutStudent };
       });
 
-      this.signOutList.forEach((student) => {
-        const index = Number(student.number) - 1;
-        students[index] = { ...students[index], ...student, signOut: true };
-      });
-
-      this.absenceTotal = students.filter((student) => student?.number == undefined).length;
+      this.fullAttendanceTotal = students.filter((student) => student?.signIn && student?.signOut).length;
+      this.absenceTotal = students.filter((student) => !student?.signIn && !student?.signOut).length;
       this.lateTotal = students.filter((student) => !student?.signIn && student?.signOut).length;
       this.excusedTotal = students.filter((student) => student?.signIn && !student?.signOut).length;
 
